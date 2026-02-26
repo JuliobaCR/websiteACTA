@@ -13,9 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { ShineBorder } from "@/components/ui/shine-border";
 
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/xyzndpdo";
-
-type Status = "idle" | "ok" | "error";
+type Status = "idle" | "ok" | "duplicate" | "error";
 
 export default function WaitlistForm() {
   const [email, setEmail] = useState("");
@@ -43,7 +41,7 @@ export default function WaitlistForm() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,13 +49,16 @@ export default function WaitlistForm() {
         },
         body: JSON.stringify({
           email,
-          company,
-          message,
+          company_name: company,
+          use_case: message,
           _gotcha: botField,
-          _subject: "New waitlist signup · Acta",
-          page: typeof window !== "undefined" ? window.location.href : "",
         }),
       });
+
+      if (res.status === 409) {
+        setStatus("duplicate");
+        return;
+      }
 
       if (!res.ok) throw new Error("Submission failed");
 
@@ -139,6 +140,11 @@ export default function WaitlistForm() {
             {status === "ok" && (
               <p className="text-sm text-green-500 text-center">
                 Thank you! We will contact you soon.
+              </p>
+            )}
+            {status === "duplicate" && (
+              <p className="text-sm text-yellow-400 text-center">
+                This email is already on the waitlist. We&apos;ll be in touch!
               </p>
             )}
             {status === "error" && (

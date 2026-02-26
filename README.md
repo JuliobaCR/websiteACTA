@@ -77,6 +77,10 @@ ACTA Web provides a sophisticated frontend experience for managing verifiable cr
 - Node.js 18 or higher
 - npm or yarn package manager
 - Modern browser with WebAuthn support
+- **Docker Desktop** (optional — required only for local Supabase database)
+- **Supabase CLI** (optional — `npm i -g supabase` or use via `npx supabase`)
+
+> **Note:** Docker and Supabase CLI are only needed if you want a local database for waitlist persistence. Without them, the app runs normally using placeholder credentials — waitlist submissions will simply not be stored.
 
 ### Installation
 
@@ -108,6 +112,65 @@ NEXT_PUBLIC_STELLAR_NETWORK=testnet
 NEXT_PUBLIC_ENABLE_PASSKEY=true
 NEXT_PUBLIC_ENABLE_PARTICLES=true
 ```
+
+### Local Supabase (Docker) — Optional
+
+The project includes a full local Supabase setup for waitlist persistence. **This is entirely optional.** When Supabase environment variables are missing or contain placeholder values, the app starts normally and the waitlist form submits without errors (requests simply won't be persisted).
+
+#### Quick start
+
+1. **Install & start Docker Desktop** — make sure the Docker engine is running.
+2. **Start Supabase locally:**
+
+   ```bash
+   npm run db:start
+   ```
+
+   This pulls the Supabase Docker images (first run takes a few minutes) and prints the local credentials, including `API URL`, `anon key`, and `service_role key`.
+
+3. **Copy the printed credentials into `.env.local`:**
+
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon key from db:start>
+   SUPABASE_SERVICE_ROLE_KEY=<service_role key from db:start>
+   ```
+
+4. **Run migrations and seed:**
+
+   ```bash
+   npm run db:reset
+   ```
+
+   This applies all migrations in `supabase/migrations/` and runs `supabase/seed.sql`, which inserts 8 sample waitlist rows.
+
+5. **Start the dev server:**
+
+   ```bash
+   npm run dev
+   ```
+
+#### Available database scripts
+
+| Script | Command | Description |
+| --- | --- | --- |
+| `npm run db:start` | `supabase start` | Start local Supabase (Docker containers) |
+| `npm run db:stop` | `supabase stop` | Stop local Supabase |
+| `npm run db:reset` | `supabase db reset` | Drop & recreate DB, run migrations + seed |
+| `npm run db:migration <name>` | `supabase migration new` | Create a new blank migration file |
+
+#### Supabase Studio
+
+When Supabase is running locally, you can access **Supabase Studio** at [http://127.0.0.1:54323](http://127.0.0.1:54323) to browse tables, run SQL, and inspect data.
+
+#### Credential fallbacks
+
+The Supabase client (`src/lib/supabase.ts`) is designed to be resilient:
+
+- If `NEXT_PUBLIC_SUPABASE_URL` is missing or contains `"your_supabase"` / `"placeholder"`, a safe placeholder URL is used.
+- If `NEXT_PUBLIC_SUPABASE_ANON_KEY` is missing, a placeholder JWT is used.
+- If `SUPABASE_SERVICE_ROLE_KEY` is missing, the server falls back to the anon client and logs a warning.
+- **The app never throws at startup** regardless of whether Supabase env vars are set.
 
 ### Development
 
