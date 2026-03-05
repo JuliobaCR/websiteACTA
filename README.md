@@ -152,12 +152,12 @@ The project includes a full local Supabase setup for waitlist persistence. **Thi
 
 #### Available database scripts
 
-| Script | Command | Description |
-| --- | --- | --- |
-| `npm run db:start` | `supabase start` | Start local Supabase (Docker containers) |
-| `npm run db:stop` | `supabase stop` | Stop local Supabase |
-| `npm run db:reset` | `supabase db reset` | Drop & recreate DB, run migrations + seed |
-| `npm run db:migration <name>` | `supabase migration new` | Create a new blank migration file |
+| Script                        | Command                  | Description                               |
+| ----------------------------- | ------------------------ | ----------------------------------------- |
+| `npm run db:start`            | `supabase start`         | Start local Supabase (Docker containers)  |
+| `npm run db:stop`             | `supabase stop`          | Stop local Supabase                       |
+| `npm run db:reset`            | `supabase db reset`      | Drop & recreate DB, run migrations + seed |
+| `npm run db:migration <name>` | `supabase migration new` | Create a new blank migration file         |
 
 #### Supabase Studio
 
